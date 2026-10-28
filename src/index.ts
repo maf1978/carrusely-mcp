@@ -15,7 +15,7 @@ function getSupabase() {
 function createServer() {
   const server = new McpServer({
     name: "Carrusely",
-    version: "1.2.0",
+    version: "1.3.0",
   });
 
   server.registerTool(
@@ -97,23 +97,30 @@ function createServer() {
   server.registerTool(
     "create_carousel",
     {
-      description: "Crea un nuevo carrusel y guarda las slides",
+      description: "Crea un nuevo carrusel y guarda las slides, caption y hashtags",
       inputSchema: z.object({
         title: z.string(),
         prompt: z.string(),
         brandId: z.string().optional(),
         templateId: z.string().optional(),
+        caption: z.string().optional(),
+        hashtags: z.array(z.string()).optional(),
         slides: z.array(
           z.object({
             title: z.string(),
             body: z.string(),
             kind: z.enum(["portada", "contenido", "cierre"]).optional(),
+            visual: z.string().optional(),
           })
         ),
       }),
     },
-    async ({ title, prompt, brandId, templateId, slides }) => {
+    async ({ title, prompt, brandId, templateId, caption, hashtags, slides }) => {
       const supabase = getSupabase();
+
+      const settings: any = {};
+      if (caption) settings.caption = caption;
+      if (hashtags) settings.hashtags = hashtags;
 
       const { data: carousel, error: cError } = await supabase
         .from("carousels")
@@ -126,6 +133,7 @@ function createServer() {
           engine: "claude",
           slide_count: slides.length,
           status: "done",
+          settings,
         })
         .select()
         .single();
@@ -140,6 +148,7 @@ function createServer() {
         kind: s.kind || (i === 0 ? "portada" : i === slides.length - 1 ? "cierre" : "contenido"),
         title: s.title,
         body: s.body,
+        spec: s.visual ? { visual: s.visual } : {},
       }));
 
       const { error: sError } = await supabase.from("slides").insert(slidesData);
@@ -181,27 +190,6 @@ function createServer() {
 
       if (error) return { content: [{ type: "text", text: error.message }], isError: true };
       return { content: [{ type: "text", text: `Slide actualizada: ${JSON.stringify(data)}` }] };
-    }
-  );
-
-  server.registerTool(
-    "generate_caption",
-    {
-      description: "Genera un caption + hashtags para un carrusel",
-      inputSchema: z.object({
-        carouselId: z.string().optional(),
-        topic: z.string(),
-        brandTone: z.string().optional(),
-      }),
-    },
-    async ({ topic }) => {
-      const caption = `${topic}\n\n¿Quieres más tips como este? Síguenos para no perdértelos.\n\n#salud #bienestar #tips`;
-      return {
-        content: [{
-          type: "text",
-          text: `Caption sugerido:\n\n${caption}`,
-        }],
-      };
     }
   );
 
