@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "carrusely-mcp",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-27",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  "upload_source_maps": true,
+  "vars": {
+    "SUPABASE_URL": "https://eflykdzsunjiwzsisaoj.supabase.co",
+    "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVmbHlrZHpzdW5qaXd6c2lzYW9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMxMzQyNzIsImV4cCI6MjEwODcxMDI3Mn0.PCYNpDwtKC841gIZ5tuWt_yXiRr-w9s0QgPCuiCBRx0"
+  }
+}
